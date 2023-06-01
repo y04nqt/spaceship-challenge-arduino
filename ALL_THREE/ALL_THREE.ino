@@ -23,6 +23,13 @@ byte colPins[COLS] = {6, 7, 8, 9};
  
 Keypad TheKeyPad = Keypad(makeKeymap(buttons), rowPins, colPins, ROWS, COLS);
 
+void RGB_color(int red_value, int green_value, int blue_value)
+{
+  analogWrite(redPin, red_value);
+  analogWrite(greenPin, green_value);
+  analogWrite(bluePin, blue_value);
+}
+
 int unlockMode(){
     char result ;
  
@@ -38,6 +45,8 @@ int unlockMode(){
           Serial.println("WRONG PASSWORD");
           Serial.println(result);
           playError();
+          lightError();
+          delay(1000);
           return -1;                    //  -1 means failed -- return immediately
        }
        Serial.print("*");  // print a phantom character for a successful keystroke
@@ -66,18 +75,25 @@ void playError() {
   delay(100);
   noTone(buzzer);
 }
- 
+
+void lightError() {
+  RGB_color(225, 0, 0); // flash LED blue
+  delay(250);
+  RGB_color(0, 0, 0);
+  delay(250);
+  RGB_color(225, 0, 0); // flash LED blue
+  delay(250);
+  RGB_color(0, 0, 0);
+  delay(250);
+  RGB_color(225, 0, 0); // flash LED blue
+  delay(250);
+  RGB_color(0, 0, 0);
+}
+
 void playInput() {
   tone(buzzer, 880, 200);
   delay(50);
   noTone(buzzer);
-}
-
-void RGB_color(int red_value, int green_value, int blue_value)
-{
-  analogWrite(redPin, red_value);
-  analogWrite(greenPin, green_value);
-  analogWrite(bluePin, blue_value);
 }
 
 void setup() {
@@ -85,7 +101,7 @@ void setup() {
   pinMode(greenPin, OUTPUT);
   pinMode(bluePin, OUTPUT);
  
-  RGB_color(125, 125, 125);  //set LED to white on startup...
+  RGB_color(225, 225, 225);  //set LED to white on startup...
   delay(2000);
   RGB_color(0, 0, 0);  //... and off again
  
@@ -104,10 +120,10 @@ void loop() {
    
     if(access < 0) {
       Serial.println("Access Denied. Cannot change password without knowing the previous or default.");
-      RGB_color(125, 0, 0); // LED to RED
+      RGB_color(225, 0, 0); // LED to RED
     }
     else {
-      RGB_color(0, 125, 0); // LED to GREEN
+      RGB_color(0, 225, 0); // LED to GREEN
       delay(2000);
       RGB_color(0, 0, 0);  //... and off again
       Serial.println("Welcome, authorized user. Please Enter a new password: ");
@@ -121,14 +137,15 @@ void loop() {
         currentPassword[i] = result;
         Serial.print("*");    // print a phantom character for a successful keystroke
         playInput();
-        RGB_color(0, 0, 125); // flash LED blue
+        RGB_color(0, 0, 225); // flash LED blue
         delay(100);
         RGB_color(0, 0, 0);
       }   //  done after 4 characters are accepted
      
       Serial.println("");
       Serial.println("Password Successfully Changed!");
-      RGB_color(25, 0, 125); // LED to GREEN
+      RGB_color(225, 0, 225); // LED to GREEN
+      delay(500);
     }
   }
  
@@ -136,11 +153,12 @@ void loop() {
     int access = unlockMode();
     if(access < 0) {
       Serial.println("Password error. Access Denied.");
-      RGB_color(125, 0, 0); // LED to RED
+      RGB_color(225, 0, 0); // LED to RED
     }
     else {
       Serial.println("Welcome, authorized user. You may now begin using the system.");
-      RGB_color(0, 125, 0); // LED to GREEN
+      RGB_color(0, 225, 0); // LED to GREEN
+      delay(500);
    }
   }
  
